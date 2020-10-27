@@ -29,13 +29,24 @@ const serverlessConfiguration: Serverless = {
     region: 'eu-west-1',
   },
   functions: {
-    hello: {
-      handler: 'handler.hello',
+    getProductsList: {
+      handler: 'src/handlers/getProductsList.handler',
       events: [
         {
           http: {
             method: 'get',
-            path: 'hello',
+            path: 'products',
+          }
+        }
+      ]
+    },
+    getProductsById: {
+      handler: 'src/handlers/getProductsById.handler',
+      events: [
+        {
+          http: {
+            method: 'get',
+            path: 'products/{id}',
           }
         }
       ]
