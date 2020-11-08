@@ -5,6 +5,6 @@
  - Swagger documentation: <work in progress> 
 
 ## Frontend links:
-- Cloudfront distribution for frontend app: [https://diby90tgmbstd.cloudfront.net](https://github.com/EugeneAlexeenko/nodejs-aws-fe)
+- Cloudfront distribution for frontend app: [https://diby90tgmbstd.cloudfront.net](https://diby90tgmbstd.cloudfront.net)
 - Frontend repo: [https://github.com/EugeneAlexeenko/nodejs-aws-fe](https://github.com/EugeneAlexeenko/nodejs-aws-fe) 
         
