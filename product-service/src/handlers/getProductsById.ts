@@ -1,8 +1,9 @@
-import {APIGatewayProxyHandler} from 'aws-lambda';
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
-import {Client, ClientConfig} from "pg";
+import { Client, ClientConfig } from 'pg';
+import { buildResponse } from '../utils';
 
-const {PG_HOST, PG_PORT, PG_USER, PG_PASSWORD} = process.env;
+const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD } = process.env;
 const clientConfig: ClientConfig = {
     host: PG_HOST,
     port: Number(PG_PORT),
@@ -33,31 +34,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         const product = rows[0];
 
         if (!product) {
-            return {
-                statusCode: 404,
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': true,
-                },
-                body: JSON.stringify({message: `Sorry, the product with id=${id} has not been found`})
-            }
+            return buildResponse(404, JSON.stringify({message: `Sorry, the product with id=${id} has not been found`}));
         }
 
-        return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: JSON.stringify(product)
-        }
+        return buildResponse(200, JSON.stringify(product));
     } catch (err) {
         console.log(err);
 
-        return {
-            statusCode: 500,
-            body: 'Server error'
-        }
+        return buildResponse(500, 'Server error');
     } finally {
         await client.end();
     }

@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
-import {Client, ClientConfig} from 'pg';
+import { Client, ClientConfig } from 'pg';
+import { buildResponse } from '../utils';
 
 const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD } = process.env;
 const clientConfig: ClientConfig = {
@@ -36,14 +37,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const isProductValid = validateProduct(newProduct);
 
     if (!isProductValid) {
-        return {
-            statusCode: 400,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: 'Invalid data: ' + JSON.stringify(newProduct)
-        };
+        return buildResponse(400, 'Invalid data: ' + JSON.stringify(newProduct));
     }
 
     const client = new Client(clientConfig);
@@ -71,27 +65,13 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
         await client.query('COMMIT');
 
-        return {
-            statusCode: 201,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: 'Product successfully created'
-        };
+        return buildResponse(201, 'Product successfully created');
     } catch (err) {
         console.log(err);
 
         await client.query('ROLLBACK');
 
-        return {
-            statusCode: 500,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: 'Server error'
-        };
+        return buildResponse(500, 'Server error');
     } finally {
         await client.end();
     }

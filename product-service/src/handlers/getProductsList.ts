@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
-import {Client, ClientConfig} from 'pg';
+import { Client, ClientConfig } from 'pg';
+import { buildResponse } from '../utils';
 
 const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD } = process.env;
 const clientConfig: ClientConfig = {
@@ -28,27 +29,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
             ON product.id = stock.product_id
         `);
 
-        console.log(products);
-
-        return {
-            statusCode: 200,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: JSON.stringify(products)
-        };
+        return buildResponse(200, JSON.stringify(products));
     } catch (err) {
         console.log(err);
 
-        return {
-            statusCode: 500,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-            body: 'Server error'
-        };
+        return buildResponse(500, 'Server error');
     } finally {
         await client.end();
     }
