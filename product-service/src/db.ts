@@ -1,4 +1,5 @@
-import {Product} from "./types/Product";
+import { Product } from "./types/Product";
+import { ClientConfig } from "pg";
 
 export const products: Product[] = [
     {
@@ -50,3 +51,16 @@ export const getAllProducts = async (): Promise<Product[] | []> => {
 export const getProductById = async (id: string): Promise<Product | undefined> => {
     return products.find(product => product.id === id);
 }
+
+const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD } = process.env;
+
+export const getClientConfig = (): ClientConfig => ({
+    host: PG_HOST,
+        port: Number(PG_PORT),
+        user: PG_USER,
+        password: PG_PASSWORD,
+        ssl: {
+        rejectUnauthorized: false
+    },
+    connectionTimeoutMillis: 5000
+});
