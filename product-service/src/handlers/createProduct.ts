@@ -1,19 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
-import { Client, ClientConfig } from 'pg';
+import { Client } from 'pg';
+import { getClientConfig } from '../db';
 import { buildResponse } from '../utils';
-
-const { PG_HOST, PG_PORT, PG_USER, PG_PASSWORD } = process.env;
-const clientConfig: ClientConfig = {
-    host: PG_HOST,
-    port: Number(PG_PORT),
-    user: PG_USER,
-    password: PG_PASSWORD,
-    ssl: {
-        rejectUnauthorized: false
-    },
-    connectionTimeoutMillis: 5000
-};
 
 type CreateProductDTO = {
     title: string,
@@ -29,6 +18,8 @@ const validateProduct = (product: CreateProductDTO) => {
         (product.price && typeof product.price === 'number') &&
         (product.count && typeof product.count === 'number');
 };
+
+const clientConfig = getClientConfig();
 
 export const handler: APIGatewayProxyHandler = async (event) => {
     console.log('createProduct event: ' + JSON.stringify(event));
