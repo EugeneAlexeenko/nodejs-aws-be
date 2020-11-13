@@ -6,7 +6,7 @@ export const products: Product[] = [
         "description": "JEYPOD Remote Control Car, 2.4 GHZ High Speed Racing Car with 4 Batteries",
         "id": "7567ec4b-b10c-48c5-9345-fc73c48a80a0",
         "price": 24.99,
-        "title": "Short Product Description3",
+        "title": "Car",
         "imageUrl": "https://images-na.ssl-images-amazon.com/images/I/61s5bPvYJfL._AC_SX679_.jpg"
     },
     {
