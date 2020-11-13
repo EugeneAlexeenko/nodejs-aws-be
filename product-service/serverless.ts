@@ -12,6 +12,11 @@ const serverlessConfiguration: Serverless = {
     webpack: {
       webpackConfig: './webpack.config.js',
       includeModules: true
+    },
+    dotenv: {
+      required: {
+        file: true
+      }
     }
   },
   // Add the serverless-webpack plugin
