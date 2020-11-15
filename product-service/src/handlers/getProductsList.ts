@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from 'aws-lambda';
 import 'source-map-support/register';
 import { Client } from 'pg';
 import { getClientConfig } from '../db';
-import { buildResponse } from '../utils';
+import { buildResponse } from '../../../shared/utils';
 
 const clientConfig = getClientConfig();
 
