@@ -38,7 +38,7 @@ const serverlessConfiguration: Serverless = {
                 Effect: 'Allow',
                 Action: 's3:ListBucket',
                 Resource: [
-                   `arn:aws:s3:::${BUCKET}`
+                    `arn:aws:s3:::${BUCKET}`
                 ]
             },
             {
@@ -74,6 +74,24 @@ const serverlessConfiguration: Serverless = {
                 },
             ],
         },
+        importFileParser: {
+            handler: 'src/handler.importFileParser',
+            events: [
+                {
+                    s3: {
+                        bucket: BUCKET,
+                        event: 's3:ObjectCreated:*',
+                        rules: [
+                            {
+                                prefix: 'uploaded/',
+                                suffix: '.csv'
+                            }
+                        ],
+                        existing: true // skip bucket creation if already exists
+                    }
+                }
+            ]
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 import { importProductsFile } from './importProductsFile';
 import { S3 } from 'aws-sdk';
-import { APIGatewayProxyEvent } from "aws-lambda";
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 jest.mock('aws-sdk');
 
