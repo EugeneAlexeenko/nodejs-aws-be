@@ -30,6 +30,9 @@ const serverlessConfiguration: Serverless = {
         },
         environment: {
             AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+            CATALOG_ITEMS_QUEUE_URL: {
+                'Fn::ImportValue': 'CatalogItemsQueueUrl'
+            }
         },
         stage: STAGE,
         region: REGION,
@@ -51,6 +54,13 @@ const serverlessConfiguration: Serverless = {
                 Resource: [
                     `arn:aws:s3:::${BUCKET}/*`,
                 ],
+            },
+            {
+                Effect: 'Allow',
+                Action: 'sqs:*',
+                Resource: {
+                    'Fn::ImportValue': 'CatalogItemsQueueArn'
+                }
             }
         ]
     },
@@ -92,7 +102,7 @@ const serverlessConfiguration: Serverless = {
                 }
             ]
         }
-    }
+    },
 }
 
 module.exports = serverlessConfiguration;
