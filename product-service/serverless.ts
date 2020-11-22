@@ -3,7 +3,14 @@ import * as dotenv from 'dotenv';
 
 dotenv.config();
 
-const { STAGE, REGION, CATALOG_ITEMS_QUEUE_NAME } = process.env;
+const {
+  STAGE,
+  REGION,
+  CATALOG_ITEMS_QUEUE_NAME,
+  CREATE_PRODUCT_TOPIC_NAME,
+  MAIN_EMAIL,
+  SECONDARY_EMAIL
+} = process.env;
 
 const serverlessConfiguration: Serverless = {
   service: {
@@ -34,6 +41,9 @@ const serverlessConfiguration: Serverless = {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
       CATALOG_ITEMS_QUEUE_URL: {
         Ref: 'CatalogItemsQueue'
+      },
+      CREATE_PRODUCT_TOPIC_ARN: {
+        Ref: 'CreateProductTopic'
       }
     },
     stage: STAGE,
@@ -46,6 +56,13 @@ const serverlessConfiguration: Serverless = {
         Resource: {
           'Fn::GetAtt': ['CatalogItemsQueue', 'Arn']
         }
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sns:*',
+        Resource: {
+          Ref: 'CreateProductTopic'
+        }
       }
     ]
   },
@@ -56,6 +73,37 @@ const serverlessConfiguration: Serverless = {
         Type: 'AWS::SQS::Queue',
         Properties: {
           QueueName: CATALOG_ITEMS_QUEUE_NAME
+        }
+      },
+      CreateProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: CREATE_PRODUCT_TOPIC_NAME
+        }
+      },
+      CreateProductSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: MAIN_EMAIL,
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'CreateProductTopic'
+          }
+        }
+      },
+      CreateExpensiveProductSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: SECONDARY_EMAIL,
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'CreateProductTopic'
+          },
+          FilterPolicy: {
+            price: [{
+              numeric: ['>=', 100]
+            }]
+          }
         }
       }
     },
