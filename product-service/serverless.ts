@@ -91,7 +91,9 @@ const serverlessConfiguration: Serverless = {
           }
         }
       },
-      CreateExpensiveProductSubscription: {
+      // This is contrived example of "FilterPolicy". To test it we need
+      // put 'test-subscription' to description field any product(s) in .csv
+      CreateProductTestSubscription: {
         Type: 'AWS::SNS::Subscription',
         Properties: {
           Endpoint: SECONDARY_EMAIL,
@@ -100,9 +102,7 @@ const serverlessConfiguration: Serverless = {
             Ref: 'CreateProductTopic'
           },
           FilterPolicy: {
-            price: [{
-              numeric: ['>=', 100]
-            }]
+            description: ["test-subscription"]
           }
         }
       }
