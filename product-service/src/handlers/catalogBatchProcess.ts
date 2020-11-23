@@ -25,6 +25,7 @@ export const handler: SQSHandler = async (event) => {
                 };
                 await sns.publish(params).promise();
             } catch (err) {
+                console.log(err);
                 console.log('Product creation failed. Sending notification');
                 const params: SNS.Types.PublishInput = {
                     Subject: 'Product creation failure',
