@@ -1,14 +1,16 @@
 import 'source-map-support/register';
 import { S3Handler } from 'aws-lambda';
-import { S3 } from 'aws-sdk';
-import csv from 'csv-parser';
+import { S3, SQS } from 'aws-sdk';
+import * as csv from 'csv-parser';
+import {SendMessageRequest} from "aws-sdk/clients/sqs";
 
-const { REGION, BUCKET } = process.env;
+const { REGION, BUCKET, CATALOG_ITEMS_QUEUE_URL } = process.env;
 
 export const importFileParser: S3Handler = async (event) => {
     console.log('importFileParser event: ' + JSON.stringify(event));
 
     const s3 = new S3({region: REGION});
+    const sqs = new SQS();
 
     const promises = [];
 
@@ -22,8 +24,22 @@ export const importFileParser: S3Handler = async (event) => {
             const s3Stream = s3.getObject(params).createReadStream()
 
             s3Stream.pipe(csv())
-                .on('data', (data) => {
-                    console.log('data:', data);
+                .on('data', (csvRow) => {
+                    console.log('csvRow:', csvRow);
+
+                    const sqsParams: SendMessageRequest = {
+                        QueueUrl: CATALOG_ITEMS_QUEUE_URL,
+                        MessageBody: JSON.stringify(csvRow)
+                    };
+                    sqs.sendMessage(sqsParams, (err, result) => {
+                        if (err) {
+                            console.log(err);
+
+                            reject(err)
+                        }
+
+                        console.log('Message has been sent to queue, result:', result);
+                    });
                 })
                 .on('error', error => {
                     console.log(error);

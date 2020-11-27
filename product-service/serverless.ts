@@ -1,11 +1,20 @@
 import type { Serverless } from 'serverless/aws';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const {
+  STAGE,
+  REGION,
+  CATALOG_ITEMS_QUEUE_NAME,
+  CREATE_PRODUCT_TOPIC_NAME,
+  MAIN_EMAIL,
+  SECONDARY_EMAIL
+} = process.env;
 
 const serverlessConfiguration: Serverless = {
   service: {
     name: 'nodejs-aws-be-product-service',
-    // app and org for use with dashboard.serverless.com
-    // app: your-app-name,
-    // org: your-org-name,
   },
   frameworkVersion: '2',
   custom: {
@@ -21,6 +30,7 @@ const serverlessConfiguration: Serverless = {
   },
   // Add the serverless-webpack plugin
   plugins: ['serverless-webpack', 'serverless-dotenv-plugin'],
+
   provider: {
     name: 'aws',
     runtime: 'nodejs12.x',
@@ -29,10 +39,94 @@ const serverlessConfiguration: Serverless = {
     },
     environment: {
       AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1',
+      CATALOG_ITEMS_QUEUE_URL: {
+        Ref: 'CatalogItemsQueue'
+      },
+      CREATE_PRODUCT_TOPIC_ARN: {
+        Ref: 'CreateProductTopic'
+      }
     },
-    stage: 'dev',
-    region: 'eu-west-1',
+    stage: STAGE,
+    region: REGION,
+
+    iamRoleStatements: [
+      {
+        Effect: 'Allow',
+        Action: 'sqs:*',
+        Resource: {
+          'Fn::GetAtt': ['CatalogItemsQueue', 'Arn']
+        }
+      },
+      {
+        Effect: 'Allow',
+        Action: 'sns:*',
+        Resource: {
+          Ref: 'CreateProductTopic'
+        }
+      }
+    ]
   },
+
+  resources: {
+    Resources: {
+      CatalogItemsQueue: {
+        Type: 'AWS::SQS::Queue',
+        Properties: {
+          QueueName: CATALOG_ITEMS_QUEUE_NAME
+        }
+      },
+      CreateProductTopic: {
+        Type: 'AWS::SNS::Topic',
+        Properties: {
+          TopicName: CREATE_PRODUCT_TOPIC_NAME
+        }
+      },
+      CreateProductSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: MAIN_EMAIL,
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'CreateProductTopic'
+          }
+        }
+      },
+      // This is contrived example of "FilterPolicy". To test it we need
+      // put 'test-subscription' to description field any product(s) in .csv
+      CreateProductTestSubscription: {
+        Type: 'AWS::SNS::Subscription',
+        Properties: {
+          Endpoint: SECONDARY_EMAIL,
+          Protocol: 'email',
+          TopicArn: {
+            Ref: 'CreateProductTopic'
+          },
+          FilterPolicy: {
+            description: ["test-subscription"]
+          }
+        }
+      }
+    },
+    Outputs: {
+      CatalogItemsQueueUrl: {
+        Value: {
+          Ref: 'CatalogItemsQueue'
+        },
+        Export: {
+          Name: 'CatalogItemsQueueUrl'
+        }
+      },
+      CatalogItemsQueueArn: {
+        Value: {
+          'Fn::GetAtt': ['CatalogItemsQueue', 'Arn']
+        },
+        Export: {
+          Name: 'CatalogItemsQueueArn'
+        }
+      }
+    }
+  },
+
   functions: {
     getProductsList: {
       handler: 'src/handlers/getProductsList.handler',
@@ -66,6 +160,19 @@ const serverlessConfiguration: Serverless = {
             method: 'post',
             path: 'products',
             cors: true
+          }
+        }
+      ]
+    },
+    catalogBatchProcess: {
+      handler: 'src/handlers/catalogBatchProcess.handler',
+      events: [
+        {
+          sqs: {
+            batchSize: 5,
+            arn: {
+              'Fn::GetAtt': ['CatalogItemsQueue', 'Arn']
+            }
           }
         }
       ]
