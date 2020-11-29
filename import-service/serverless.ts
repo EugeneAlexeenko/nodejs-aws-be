@@ -19,6 +19,9 @@ const serverlessConfiguration: Serverless = {
             required: {
                 file: true
             }
+        },
+        basicAuthorizerArn: {
+            'Fn::ImportValue': 'BasicAuthorizerLambdaFunctionQualifiedArn'
         }
     },
     plugins: ['serverless-webpack', 'serverless-dotenv-plugin'],
@@ -64,6 +67,51 @@ const serverlessConfiguration: Serverless = {
             }
         ]
     },
+
+    resources: {
+        Resources: {
+            GatewayResponseDefault500: {
+                Type: 'AWS::ApiGateway::GatewayResponse',
+                Properties: {
+                    ResponseParameters: {
+                        'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+                        'gatewayresponse.header.Access-Control-Allow-Headers': "'*'",
+                    },
+                    ResponseType: 'DEFAULT_5XX',
+                    RestApiId: {
+                        Ref: 'ApiGatewayRestApi',
+                    },
+                },
+            },
+            GatewayResponseAccessDenied: {
+                Type: 'AWS::ApiGateway::GatewayResponse',
+                Properties: {
+                    ResponseParameters: {
+                        'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+                        'gatewayresponse.header.Access-Control-Allow-Headers': "'*'"
+                    },
+                    ResponseType: 'ACCESS_DENIED',
+                    RestApiId: {
+                        Ref: 'ApiGatewayRestApi'
+                    }
+                },
+            },
+            GatewayResponseUnauthorized: {
+                Type: 'AWS::ApiGateway::GatewayResponse',
+                Properties: {
+                    ResponseParameters: {
+                        'gatewayresponse.header.Access-Control-Allow-Origin': "'*'",
+                        'gatewayresponse.header.Access-Control-Allow-Headers': "'*'"
+                    },
+                    ResponseType: 'UNAUTHORIZED',
+                    RestApiId: {
+                        Ref: 'ApiGatewayRestApi'
+                    }
+                },
+            },
+        },
+    },
+
     functions: {
         importProductsFile: {
             handler: 'src/handler.importProductsFile',
@@ -73,6 +121,13 @@ const serverlessConfiguration: Serverless = {
                         method: 'get',
                         path: 'import',
                         cors: true,
+                        authorizer: {
+                            type: 'token',
+                            name: 'basicAuthorizer',
+                            arn: '${cf:nodejs-aws-be-authorization-service-${self:provider.stage}.BasicAuthorizerLambdaFunctionQualifiedArn}',
+                            identitySource: 'method.request.header.Authorization',
+                            resultTtlInSeconds: 0
+                        },
                         request: {
                             parameters: {
                                 querystrings: {
