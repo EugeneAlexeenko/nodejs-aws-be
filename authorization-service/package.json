@@ -1,15 +1,13 @@
 {
-  "name": "import-service",
+  "name": "authorization-service",
   "version": "1.0.0",
-  "description": "Import service",
+  "description": "Authorization service",
   "main": "handler.js",
   "scripts": {
     "test": "jest"
   },
   "dependencies": {
-    "csv-parser": "^2.3.3",
-    "source-map-support": "^0.5.10",
-    "ts-jest": "^26.4.3"
+    "source-map-support": "^0.5.10"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.17",
@@ -21,6 +19,7 @@
     "jest": "^26.6.2",
     "serverless-dotenv-plugin": "^3.1.0",
     "serverless-webpack": "^5.2.0",
+    "ts-jest": "^26.4.3",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.10.2",
     "typescript": "^3.2.4",
