@@ -4,7 +4,10 @@
   "description": "BFF service",
   "main": "server.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "eb:init": "eb init --platform node.js --region eu-west-1",
+    "eb:create": "eb create development --single --cname eugenealexeenko-bff-develop",
+    "eb:terminate": "eb terminate"
   },
   "dependencies": {
     "axios": "^0.21.0",
