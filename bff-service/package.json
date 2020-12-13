@@ -1,0 +1,20 @@
+{
+  "name": "bff-service",
+  "version": "1.0.0",
+  "description": "BFF service",
+  "main": "server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "eb:init": "eb init --platform node.js --region eu-west-1",
+    "eb:create": "eb create development2 --single --cname eugenealexeenko-bff-develop",
+    "eb:deploy": "eb deploy",
+    "eb:terminate": "eb terminate"
+  },
+  "dependencies": {
+    "axios": "^0.21.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1"
+  },
+  "author": "Eugene Alexeenko",
+  "license": "MIT"
+}
