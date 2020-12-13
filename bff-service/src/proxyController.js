@@ -1,4 +1,5 @@
 const axios = require('axios').default;
+const cache = require('./cacheService');
 
 const proxyRequestHandler = async (req, res) => {
     const {
@@ -18,9 +19,19 @@ const proxyRequestHandler = async (req, res) => {
     console.log('recipientUrl', recipientUrl);
 
     if (recipientUrl) {
+        const url = `${recipientUrl}${originalUrl}`;
+
+        if (method === 'GET' && cache.has(url) && !cache.isExpired(url, 120)) {
+            console.log('Found cached value for url', url);
+
+            res.json(cache.get(url));
+
+            return;
+        }
+
         const axiosConfig = {
-            method: method,
-            url: `${recipientUrl}${originalUrl}`,
+            method,
+            url,
             ...(Object.keys(body || {}).length > 0 && {data: body})
         }
 
@@ -28,8 +39,13 @@ const proxyRequestHandler = async (req, res) => {
 
         try {
             const response = await axios(axiosConfig);
-
             console.log('Response from recipient', response.data);
+
+            if (method === 'GET') {
+                cache.set(url, response.data);
+                console.log(`Response from ${url} has been cashed`, response.data);
+            }
+
             res.json(response.data);
         } catch (err) {
             console.log('Some error', JSON.stringify(err));

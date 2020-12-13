@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/server.js",
     "eb:init": "eb init --platform node.js --region eu-west-1",
-    "eb:create": "eb create development --single --cname eugenealexeenko-bff-develop",
+    "eb:create": "eb create development2 --single --cname eugenealexeenko-bff-develop",
+    "eb:deploy": "eb deploy",
     "eb:terminate": "eb terminate"
   },
   "dependencies": {
